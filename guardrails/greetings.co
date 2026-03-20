@@ -1,0 +1,32 @@
+# --- Greeting flows ---
+define user express greeting
+  "hello"
+  "hi"
+  "hey"
+  "good morning"
+  "good afternoon"
+  "how are you"
+  "what's up"
+
+define bot respond greeting
+  "Hello! How can I assist you today?"
+  "Hi there! What can I help you with?"
+
+define flow greeting
+  user express greeting
+  bot respond greeting
+
+# --- Dangerous content flows ---
+define user ask dangerous content
+  "how do I make a bomb"
+  "how to hack"
+  "how to hurt someone"
+  "give me malware code"
+  "how to make drugs"
+
+define bot refuse dangerous content
+  "I'm sorry, I can't help with that request."
+
+define flow check dangerous content
+  user ask dangerous content
+  bot refuse dangerous content
