@@ -32,17 +32,23 @@ class ClearHistory:
             print(f"Error in clearing history for session {session_id}: {e}")
             return {'status': 'error', 'message': str(e)}
 
-    def clear_history(self,access_token):
-        tok_data=self.token.validate_access_token(access_token)
-        if tok_data:
-            session_id = tok_data["session_id"]
-            result = self.clear_history_process(session_id)
-            new_access_token=self.token.create_update_token(tok_data)
-            # return JSONResponse({'status': 'success','access_token':new_access_token}, status_code=200)
-            response = JSONResponse(content={'status': 'success'})
+    def clear_history(self, access_token: str):
+            tok_data = self.token.validate_access_token(access_token)
+            if not tok_data:
+                raise HTTPException(status_code=401, detail="Invalid or expired Token")
+
+            session_id = tok_data.get("session_id")
+            # Perform the deletion
+            process_result = self.clear_history_process(session_id)
+            
+            if process_result['status'] == 'error':
+                raise HTTPException(status_code=500, detail="Failed to clear history")
+
+            # Generate a fresh token to extend the session
+            new_access_token = self.token.create_update_token(tok_data)
+            
+            response = JSONResponse(content={'status': 'success', 'message': 'History cleared'})
             response.headers['Authorization'] = f"Bearer {new_access_token}"
             return response
-        else:
-            raise HTTPException(status_code=400, detail="Invalid Token") 
 
         
