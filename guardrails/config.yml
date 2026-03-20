@@ -1,0 +1,12 @@
+models:
+  - type: main
+    engine: google
+    model: gemini-2.5-flash  # or whatever model you're using via API_KEY
+
+rails:
+  input:
+    flows:
+      - check dangerous content
+  dialog:
+    flows:
+      - greeting

@@ -7,11 +7,6 @@ from src.config.configuration import ConfigurationManager
 from src.config.gcp import load_gcp_credentials
 
 
-
-
-
-
-
 class Init:
     _instance = None
     _instance_lock = threading.Lock()
