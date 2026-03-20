@@ -1,7 +1,7 @@
 import threading
 
 import chromadb
-langchain_google_genai.GoogleGenerativeAI, VertexAIEmbeddings,GoogleGenerativeAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from pymongo import MongoClient
 from src.config.configuration import ConfigurationManager
 from src.config.gcp import load_gcp_credentials
@@ -14,21 +14,32 @@ class Init:
         with cls._instance_lock:
             if cls._instance is None:
                 print('Creating the object')
-                cls._instance = super().__new__(cls)
+                instance = super().__new__(cls)
                 #1.Initialize Config
                 config_obj = ConfigurationManager()
                 config = config_obj.get_base_config()
-                cls._instance =config
                 
-                cls._instance.Chroma_client = chromadb.HttpClient(host=config.CHROMA_HOST, port=config.CHROMA_PORT)
-                cls._instance.Client = MongoClient(config.MONGODB_URI,MaxPoolSize = config.MAX_POOL_SIZE)
-                cls._instance.DB =cls._instance.Client[config.DB_NAME]
-                cls._instance.User_Collection = cls._instance.DB[config.collection_user]
-                cls._instance.History_Collection_Name = config.HISTORY_COLLECTION_NAME
-                cls._instance.History_Collection_Logs = config.HISTORY_COLLECTION_Logs
-                cls._instance.Credentials=load_gcp_credentials()
-                cls._instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=cls._instance.Credentials)
-                cls._instance.model = GoogleGenerativeAI(model_name = config.RAG_MODEL,temperature=config.temperature,top_p =config.Top_p,top_k=config.Top_k,max_output_tokens=config.Max_output_tokens)
+                instance.Chroma_client = chromadb.HttpClient(host=config.CHROMA_HOST, port=config.CHROMA_PORT)
+                instance.Client = MongoClient(config.MONGODB_URI,MaxPoolSize = config.MAX_POOL_SIZE)
+                instance.DB =instance.Client[config.DB_NAME]
+                instance.User_Collection = instance.DB[config.collection_user]
+                instance.History_Collection_Name = config.HISTORY_COLLECTION_NAME
+                instance.History_Collection_Logs = config.HISTORY_COLLECTION_Logs
+                instance.Credentials = load_gcp_credentials()
+                instance.ALGORITHM = config.ALGORITHM
+                instance.ACCESS_TOKEN_EXPIRE_MINUTES = config.ACCESS_TOKEN_EXPIRE_MINUTES
+                instance.SECRET_KEY = config.SECRET_KEY
+                instance.API_KEY = config.API_KEY
+                instance.MongoURI = config.MONGODB_URI
+                instance.DB_Mongo = config.DB_NAME
                 
-                # cls._instance.Chatbot_manager = Chatbot_Manager(config=cls._instance.config,credentials=cls._instance.credentials)
-                return cls._instance
+                
+                
+                
+                
+                instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=instance.Credentials)
+                instance.model = GoogleGenerativeAI(model_name = config.RAG_MODEL,temperature=config.temperature,top_p =config.Top_p,top_k=config.Top_k,max_output_tokens=config.Max_output_tokens)
+                    
+                cls._instance = instance
+             # cls._instance.Chatbot_manager = Chatbot_Manager(config=cls._instance.config,credentials=cls._instance.credentials)
+        return cls._instance
