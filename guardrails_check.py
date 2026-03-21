@@ -1,7 +1,6 @@
 import logging
 from nemoguardrails import RailsConfig, LLMRails
-
-logger = logging.getLogger(__name__)
+from src.logging import logger
 
 # Load once at module level — avoids reloading on every request
 _rails = None
