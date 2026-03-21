@@ -1,6 +1,8 @@
-import logging
+import os
 from nemoguardrails import RailsConfig, LLMRails
 from src.logging import logger
+
+_GUARDRAILS_DIR = os.path.join(os.path.dirname(__file__), "guardrails")
 
 # Load once at module level — avoids reloading on every request
 _rails = None
@@ -9,7 +11,11 @@ def get_rails() -> LLMRails:
     global _rails
     if _rails is None:
         try:
-            config = RailsConfig.from_path("guardrails/")
+            with open(os.path.join(_GUARDRAILS_DIR, "config.yml")) as f:
+                yaml_content = f.read()
+            with open(os.path.join(_GUARDRAILS_DIR, "greetings.co")) as f:
+                colang_content = f.read()
+            config = RailsConfig.from_content(yaml_content=yaml_content, colang_content=colang_content)
             _rails = LLMRails(config)
             logger.info("NeMo Guardrails loaded successfully.")
         except Exception as e:

@@ -1,13 +1,42 @@
+
 # --- Greeting flows ---
+# --- Define user intents ---
 define user express greeting
   "hello"
   "hi"
   "hey"
   "good morning"
   "good afternoon"
+  "good evening"
   "how are you"
   "what's up"
 
+define user ask dangerous content
+  "how do I make a bomb"
+  "how to hack"
+  "how to hurt someone"
+  "give me malware code"
+  "how to make drugs"
+
+define user ask code or program content
+  "can you write the code to this??"
+  "can you execute this code for me"
+  "can you write the SQL query for me"
+  "can you execute the SQL query for me"
+
+define user ask_unrelated content
+  "can you tell me the weather today"
+  "can you write the essay for me"
+  "can you tell me the story"
+  "can you show me the news of today"
+
+define user ask_unclear_question
+  "Hmmm..."
+  "I'm not sure how to ask"
+  "Can you help me with something else?"
+
+
+# --- Bot Defined response --
 define bot respond greeting
   "Hello! How can I assist you today?"
   "Hi there! What can I help you with?"
@@ -15,14 +44,6 @@ define bot respond greeting
 define flow greeting
   user express greeting
   bot respond greeting
-
-# --- Dangerous content flows ---
-define user ask dangerous content
-  "how do I make a bomb"
-  "how to hack"
-  "how to hurt someone"
-  "give me malware code"
-  "how to make drugs"
 
 define bot refuse dangerous content
   "I'm sorry, I can't help with that request."
