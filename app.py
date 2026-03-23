@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Annotated, Dict
 import httpx
 from pymongo import MongoClient
@@ -10,13 +11,14 @@ from pydantic import ValidationError
 from starlette.middleware.cors import CORSMiddleware
 
 # Project imports
+from chat import Chatbot_Pipeline
 from init.singleton import Init
 from pipeline.Clear_history import ClearHistory
 from pipeline.Login import Login
 from pipeline.Text_To_Speach import TextToSpeach
 from pipeline.history import ChatHistoryResponse, ChatMessage, HistoryPage
 from src.components.token import Token # Ensure this is imported
-from entity import ChatHistoryClear, EncryptedLoginData, TextToSpeechRequest
+from entity import ChatHistoryClear, ChatRequest2, EncryptedLoginData, TextToSpeechRequest
 from utils.common import decrypt_credentials
 from logging import logger
 from src.utils.security import (
@@ -74,6 +76,29 @@ async def login(request: Request, data: EncryptedLoginData = Body(...)):
     except Exception as e:
         # Catch-all for unexpected issues
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@routes.post("/chat2")
+async def chat(request: Request, data: ChatRequest2 = Body(...)):
+    try:
+        check_no_query_params(request)
+        authorization_header = request.headers.get("Authorization")
+        if authorization_header and authorization_header.startswith("Bearer "):
+            access_token = authorization_header[len("Bearer "):].strip()
+        else:
+            raise HTTPException(status_code=400, detail="Invalid or missing Authorization header")
+        user_input = urllib.parse.unquote(data.input)
+        lang = urllib.parse.unquote(data.lang)
+        sanitized_input = re.sub(r'[<>{}[\]\\|]', '', user_input)
+        bot = Chatbot_Pipeline()
+        result = await bot.main_chatbot(access_token, sanitized_input, lang)
+        logger.info("Chat request completed")
+        return JSONResponse(content=result)
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())
+    except Exception as e:
+        logger.error(f"Chat endpoint error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 

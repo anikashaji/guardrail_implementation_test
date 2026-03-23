@@ -1,7 +1,6 @@
 
-# --- Greeting flows ---
 # --- Define user intents ---
-define user express greeting
+define user express_greeting
   "hello"
   "hi"
   "hey"
@@ -11,43 +10,59 @@ define user express greeting
   "how are you"
   "what's up"
 
-define user ask dangerous content
+define user ask_dangerous_content
   "how do I make a bomb"
   "how to hack"
   "how to hurt someone"
   "give me malware code"
   "how to make drugs"
 
-define user ask code or program content
-  "can you write the code to this??"
+define user ask_code_content
+  "can you write the code to this"
   "can you execute this code for me"
   "can you write the SQL query for me"
   "can you execute the SQL query for me"
 
-define user ask_unrelated content
+define user ask_unrelated_content
   "can you tell me the weather today"
   "can you write the essay for me"
   "can you tell me the story"
   "can you show me the news of today"
 
 define user ask_unclear_question
-  "Hmmm..."
+  "Hmmm"
   "I'm not sure how to ask"
-  "Can you help me with something else?"
+  "Can you help me with something else"
 
 
-# --- Bot Defined response --
-define bot respond greeting
+# --- Bot responses ---
+define bot respond_greeting
   "Hello! How can I assist you today?"
   "Hi there! What can I help you with?"
 
-define flow greeting
-  user express greeting
-  bot respond greeting
-
-define bot refuse dangerous content
+define bot refuse_dangerous_content
   "I'm sorry, I can't help with that request."
 
-define flow check dangerous content
-  user ask dangerous content
-  bot refuse dangerous content
+define bot refuse_code_content
+  "I'm sorry, I can't write or execute code for you."
+
+define bot refuse_unrelated_content
+  "I'm sorry, I can only help with questions related to our services."
+
+
+# --- Flows ---
+define flow greeting
+  user express_greeting
+  bot respond_greeting
+
+define flow check_dangerous_content
+  user ask_dangerous_content
+  bot refuse_dangerous_content
+
+define flow check_code_content
+  user ask_code_content
+  bot refuse_code_content
+
+define flow check_unrelated_content
+  user ask_unrelated_content
+  bot refuse_unrelated_content

@@ -1,12 +1,14 @@
 models:
   - type: main
     engine: google
-    model: gemini-2.5-flash  # or whatever model you're using via API_KEY
+    model: gemini-2.5-flash
 
 rails:
   input:
     flows:
-      - check dangerous content
+      - check_dangerous_content
+      - check_code_content
+      - check_unrelated_content
   dialog:
     flows:
       - greeting

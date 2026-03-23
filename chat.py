@@ -1,17 +1,38 @@
 from guardrails_check import check_guardrails
-import asyncio
+from src.components.token import Token
+from src.pipeline.chatprocess import ChatProcess
+from src.logging import logger
 
-from src.init.singleton import Init
 
 class Chatbot_Pipeline:
-    pipeline = Init()
 
-    def main_chatbot(input_text):
-        guard_result = asyncio.run(check_guardrails(input_text))
+    def __init__(self):
+        self.Chatbot_manager = ChatProcess()
+        self.rag_chain = self.Chatbot_manager.build_rag_chain()
+        self.token = Token()
 
-        if guard_result == True:
-            response = Chatbot_Pipeline.pipeline.run(input_text)
-            return response
+    def _run_pipeline(self, user_input, user_id):
+        return self.rag_chain.invoke(
+            {"question": user_input},
+            {"configurable": {"session_id": user_id}}
+        )
 
-        if guard_result[]
+    async def main_chatbot(self, access_token, input_text, lang):
+        tok_data = self.token.validate_access_token(access_token)
+        user_id = tok_data.get("sub")
 
+        # --- Guardrails check with fallback ---
+        try:
+            guard_result = await check_guardrails(input_text)
+            if guard_result["blocked"]:
+                return {"response": guard_result["reply"], "source": "guardrails"}
+        except Exception as e:
+            logger.warning(f"Guardrails unavailable, falling back to pipeline: {e}")
+
+        # --- Normal pipeline ---
+        try:
+            response = self._run_pipeline(input_text, user_id)
+            return {"response": response, "source": "pipeline"}
+        except Exception as e:
+            logger.error(f"Pipeline failed: {e}")
+            raise

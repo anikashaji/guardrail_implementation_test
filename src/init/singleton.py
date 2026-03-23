@@ -32,7 +32,7 @@ class Init:
                 instance.API_KEY = config.API_KEY
                 instance.MongoURI = config.MONGODB_URI
                 instance.DB_Mongo = config.DB_NAME
-                
+                instance.Chroma_collection = config.CHROMA_COLLECTION
                 
                 
                 
