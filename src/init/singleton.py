@@ -5,15 +5,16 @@ from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddi
 from pymongo import MongoClient
 from src.config.configuration import ConfigurationManager
 from src.config.gcp import load_gcp_credentials
+from src.logging import logger
 
 
 class Init:
     _instance = None
     _instance_lock = threading.Lock()
+
     def __new__(cls):
         with cls._instance_lock:
             if cls._instance is None:
-                print('Creating the object')
                 instance = super().__new__(cls)
                 #1.Initialize Config
                 config_obj = ConfigurationManager()
@@ -34,12 +35,9 @@ class Init:
                 instance.DB_Mongo = config.DB_NAME
                 instance.Chroma_collection = config.CHROMA_COLLECTION
 
-
-
-
                 instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=instance.Credentials)
                 instance.model = GoogleGenerativeAI(model = config.RAG_MODEL,temperature=config.TEMPERATURE,top_p =config.TOP_P,top_k=config.TOP_K,max_output_tokens=config.MAX_OUTPUT_TOKENS,credentials=instance.Credentials)
-
+                logger.info("Initialized Singleton Instance")
                 cls._instance = instance
              # cls._instance.Chatbot_manager = Chatbot_Manager(config=cls._instance.config,credentials=cls._instance.credentials)
         return cls._instance
