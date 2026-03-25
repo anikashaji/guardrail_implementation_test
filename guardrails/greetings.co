@@ -1,5 +1,4 @@
-
-# --- Define user intents ---
+# --- User intents ---
 define user express_greeting
   "hello"
   "hi"
@@ -18,21 +17,16 @@ define user ask_dangerous_content
   "how to make drugs"
 
 define user ask_code_content
-  "can you write the code to this"
-  "can you execute this code for me"
-  "can you write the SQL query for me"
-  "can you execute the SQL query for me"
+  "can you write the code for me"
+  "can you execute this code"
+  "write me a SQL query"
+  "execute this SQL for me"
 
 define user ask_unrelated_content
   "can you tell me the weather today"
-  "can you write the essay for me"
-  "can you tell me the story"
-  "can you show me the news of today"
-
-define user ask_unclear_question
-  "Hmmm"
-  "I'm not sure how to ask"
-  "Can you help me with something else"
+  "write me an essay"
+  "tell me a story"
+  "show me the news"
 
 
 # --- Bot responses ---

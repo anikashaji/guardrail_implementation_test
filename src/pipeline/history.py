@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from src.logging import logger
 from datetime import datetime
 
-from init.singleton import Init
+from src.init.singleton import Init
 
 # Define a Pydantic model for the chat message.
 class ChatMessage(BaseModel):
@@ -86,7 +86,7 @@ class HistoryPage:
             # --- END OF CHANGE ---
 
             history = list(history_cursor)
-            
+
             # Optional: Add logging to confirm what was found
             if not history:
                 logger.info(f"No history found for user: {user_id} in collection: {self.config.HISTORY_COLLECTION_NAME}")

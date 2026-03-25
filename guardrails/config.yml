@@ -1,7 +1,9 @@
-models:
-  - type: main
-    engine: google
-    model: gemini-2.5-flash
+colang_version: "1.0"
+
+# models:
+#   - type: main
+#     engine: openai
+#     model: llama3.2:latest
 
 rails:
   input:
@@ -9,6 +11,3 @@ rails:
       - check_dangerous_content
       - check_code_content
       - check_unrelated_content
-  dialog:
-    flows:
-      - greeting

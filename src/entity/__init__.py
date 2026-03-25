@@ -70,11 +70,16 @@ class Base_Config(BaseModel):
     RAG_MODEL: str
     EMBEDD_MODEL: str
     API_KEY: str
-    CHROMA_HOST : str  
+    CHROMA_HOST : str
     CHROMA_PORT : int
     CHROMA_COLLECTION: str
     #SQLLITE_CONNECTION_STRING: str
     MAX_POOL_SIZE: int
+    TEMPERATURE: float
+    TOP_P: float
+    TOP_K: int
+    MAX_OUTPUT_TOKENS: int
+
 
 
 class API_Config(BaseModel):

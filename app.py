@@ -1,4 +1,3 @@
-import os
 import re
 from typing import Annotated, Dict
 import httpx
@@ -12,19 +11,18 @@ from starlette.middleware.cors import CORSMiddleware
 
 # Project imports
 from chat import Chatbot_Pipeline
-from init.singleton import Init
-from pipeline.Clear_history import ClearHistory
-from pipeline.Login import Login
-from pipeline.Text_To_Speach import TextToSpeach
-from pipeline.history import ChatHistoryResponse, ChatMessage, HistoryPage
+from src.pipeline.Clear_history import ClearHistory
+from src.pipeline.Login import Login
+from src.pipeline.Text_To_Speach import TextToSpeach
+from src.pipeline.history import ChatHistoryResponse, ChatMessage, HistoryPage
 from src.components.token import Token # Ensure this is imported
-from entity import ChatHistoryClear, ChatRequest2, EncryptedLoginData, TextToSpeechRequest
-from utils.common import decrypt_credentials
-from logging import logger
+from src.entity import ChatHistoryClear, ChatRequest2, EncryptedLoginData, TextToSpeechRequest
+from src.utils.common import decrypt_credentials
+from src.logging import logger
 from src.utils.security import (
-    SecurityHeadersMiddleware, 
-    RestrictSwaggerMiddleware, 
-    BlockReDocMiddleware, 
+    SecurityHeadersMiddleware,
+    RestrictSwaggerMiddleware,
+    BlockReDocMiddleware,
     check_no_query_params
 )
 
@@ -35,11 +33,11 @@ async def login(request: Request, data: EncryptedLoginData = Body(...)):
     try:
         # 1. Security Check
         check_no_query_params(request)
-        
+
         # 2. Decryption Logic
         userName = urllib.parse.unquote(data.userName)
         password = data.password
-        
+
         decrypted = decrypt_credentials({
             "username": userName,
             "password": password
@@ -50,7 +48,7 @@ async def login(request: Request, data: EncryptedLoginData = Body(...)):
 
         # 3. Initialize Login (Inject Token dependency if needed)
         # Assuming Login class now handles its own singleton config internally
-        login_service = Login(token=Token()) 
+        login_service = Login(token=Token())
         result = login_service.login_user(decrypted['username'], decrypted['password'])
 
         # 4. Handle Response
@@ -66,7 +64,7 @@ async def login(request: Request, data: EncryptedLoginData = Body(...)):
             # Important: Set the header
             response.headers['Authorization'] = f"Bearer {access_token}"
             return response
-        
+
         else:
             # Return specific error from login service (e.g., 401 Unauthorized)
             return JSONResponse(result, status_code=401)
@@ -111,13 +109,13 @@ async def get_chat_history(
     mongo_client: MongoClient = Depends(HistoryPage.get_mongo_client),
 ) -> ChatHistoryResponse:
     authorization_header = request.headers.get("Authorization")
-    
+
     if authorization_header and authorization_header.startswith("Bearer "):
         access_token = authorization_header[len("Bearer "):].strip()
     else:
         raise HTTPException(status_code=400, detail="Invalid or missing Authorization header")
-    
-    
+
+
     try:
         chat=Token()
         tok_data=chat.validate_access_token(access_token)
@@ -126,15 +124,15 @@ async def get_chat_history(
 
         new_access_token=chat.create_update_token(tok_data)
         history = HistoryPage.get_chat_history_from_mongodb(
-            user_id=user_id,       
-            mongo_client=mongo_client, 
-            limit=limit,            
-            offset=offset,          
+            user_id=user_id,
+            mongo_client=mongo_client,
+            limit=limit,
+            offset=offset,
         )
 
         chat_messages = []
-        if history: 
-            for message_doc in history: 
+        if history:
+            for message_doc in history:
                 try:
                     query_content = message_doc.get("query")
                     response_content = message_doc.get("query_response")
@@ -152,7 +150,7 @@ async def get_chat_history(
 
                     if response_content:
                         ai_chat_message = ChatMessage(
-                            role="Ai", 
+                            role="Ai",
                             content=response_content,
                             created_at=created_at,
                         )
@@ -162,7 +160,7 @@ async def get_chat_history(
                     logger.error(f"Error processing message document {message_doc.get('_id')}: {e}", exc_info=True)
         else:
             logger.info(f"No chat history found for user: {user_id}. Returning empty list.")
-            
+
         chat_response = ChatHistoryResponse(
             user_id=user_id, messages=chat_messages
         )
@@ -173,7 +171,7 @@ async def get_chat_history(
             )
 
     except HTTPException as e:
-        raise e 
+        raise e
     except Exception as e:
         logger.error(f"Error in get_chat_history endpoint: {e}", exc_info=True)
         raise HTTPException(
@@ -185,17 +183,17 @@ async def get_chat_history(
 async def clear_chat_history(request: Request):
     # 1. Security check
     check_no_query_params(request)
-    
+
     # 2. Extract Token from Header
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing Authorization Header")
-    
+
     token = auth_header.split(" ")[1]
 
     # 3. Process
     handler = ClearHistory()
-    return handler.clear_history(token)  
+    return handler.clear_history(token)
 
 
 @routes.post("/proxy-verify-otp")
@@ -217,7 +215,7 @@ async def proxy_verify_otp(request: Request, otp_data: Dict[str, str] = Body(...
                 headers={"Content-Type": "application/json"}
             )
 
-            external_response.raise_for_status() 
+            external_response.raise_for_status()
 
             return JSONResponse(content=external_response.json(), status_code=external_response.status_code)
 
@@ -233,7 +231,7 @@ async def proxy_verify_otp(request: Request, otp_data: Dict[str, str] = Body(...
     except Exception as e:
         logger.error(f"An unexpected error occurred in proxy-verify-otp: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error during OTP proxy.")
-    
+
 
 
 
@@ -241,7 +239,7 @@ async def proxy_verify_otp(request: Request, otp_data: Dict[str, str] = Body(...
 @routes.post("/text-to-speech")
 async def text_to_speech(request: Request, data: TextToSpeechRequest = Body(...)):
     try:
-        check_no_query_params(request) 
+        check_no_query_params(request)
         authorization_header = request.headers.get("Authorization")
         if authorization_header and authorization_header.startswith("Bearer "):
             access_token = authorization_header[len("Bearer "):].strip()
@@ -250,9 +248,9 @@ async def text_to_speech(request: Request, data: TextToSpeechRequest = Body(...)
         text_to_speech = TextToSpeach()
         response=text_to_speech.Text_to_speech_process(data,access_token)
         return response
-                           
+
     except ValidationError as e:
-        raise HTTPException(status_code=422, detail=e.errors()) 
+        raise HTTPException(status_code=422, detail=e.errors())
 
 
 
@@ -271,18 +269,18 @@ async def text_to_speech(request: Request, data: TextToSpeechRequest = Body(...)
 
 def init_app() -> FastAPI:
     app = FastAPI(docs_url=None, redoc_url=None)
-    
+
     # Middleware setup
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"], 
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["POST"],
         allow_headers=["*"], # Simplified for development
         expose_headers=["Authorization"], # Essential so frontend can see the token
     )
-    
+
     app.include_router(routes)
     return app
 

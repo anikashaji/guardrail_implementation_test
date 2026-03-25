@@ -16,11 +16,15 @@ config:
   #CHROMA_PATH: /app/chroma_db
   CHROMA_PATH: chroma_db
   RAG_MODEL: gemini-2.5-flash
+  TEMPERATURE: 0.5
   EMBEDD_MODEL: text-embedding-004
   API_KEY: AIzaSyA7hjnwNtqS0ejsownrDgMQOulbR7gaLNM
   CHROMA_COLLECTION: langchain
   SQLLITE_CONNECTION_STRING: sqlite:////app/Sqllite/Bot.db
   # SQLLITE_CONNECTION_STRING: sqlite:///D:/GENAI/HR_chatbot_GCP_1/Sqllite/Bot.db
   maxPoolSize : 350
-  CHROMA_HOST : chroma_server
+  CHROMA_HOST : "10.192.5.51"
   CHROMA_PORT : 8000
+  TOP_P : 0.9
+  TOP_K : 4
+  MAX_OUTPUT_TOKENS : 2048

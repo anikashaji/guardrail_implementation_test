@@ -10,7 +10,7 @@ class ConfigurationManager:
         self.config = read_yaml(config_filepath)
 
 
-    
+
 
     def get_base_config(self) -> Base_Config:
         config = self.config.config
@@ -34,9 +34,12 @@ class ConfigurationManager:
             CHROMA_HOST=config.CHROMA_HOST,
             CHROMA_PORT=config.CHROMA_PORT,
            # SQLLITE_CONNECTION_STRING=config.SQLLITE_CONNECTION_STRING,
-            MAX_POOL_SIZE=config.maxPoolSize
-            
+            MAX_POOL_SIZE=config.maxPoolSize,
+            TEMPERATURE=config.TEMPERATURE,
+            TOP_P=config.TOP_P,
+            TOP_K=config.TOP_K,
+            MAX_OUTPUT_TOKENS = config.MAX_OUTPUT_TOKENS
+
         )
 
         return base_config
-    

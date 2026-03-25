@@ -1,4 +1,4 @@
-from init.singleton import Init
+from src.init.singleton import Init
 from src.config.configuration import ConfigurationManager
 from src.components.token import Token
 from src.logging import logger
@@ -45,10 +45,10 @@ class TextToSpeach:
                     raise HTTPException(status_code=response.status_code, detail=response.json())
             else:
                 raise HTTPException(status_code=400, detail="Invalid Token")
-        
+
         except Exception as e:
             print(f"Error in converting Text to speech {e}")
             return {'status': 'error', 'message': str(e)}
 
-   
-        
+
+

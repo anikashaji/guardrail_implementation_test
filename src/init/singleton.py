@@ -18,7 +18,7 @@ class Init:
                 #1.Initialize Config
                 config_obj = ConfigurationManager()
                 config = config_obj.get_base_config()
-                
+
                 instance.Chroma_client = chromadb.HttpClient(host=config.CHROMA_HOST, port=config.CHROMA_PORT)
                 instance.Client = MongoClient(config.MONGODB_URI,MaxPoolSize = config.MAX_POOL_SIZE)
                 instance.DB =instance.Client[config.DB_NAME]
@@ -33,13 +33,13 @@ class Init:
                 instance.MongoURI = config.MONGODB_URI
                 instance.DB_Mongo = config.DB_NAME
                 instance.Chroma_collection = config.CHROMA_COLLECTION
-                
-                
-                
-                
+
+
+
+
                 instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=instance.Credentials)
-                instance.model = GoogleGenerativeAI(model_name = config.RAG_MODEL,temperature=config.temperature,top_p =config.Top_p,top_k=config.Top_k,max_output_tokens=config.Max_output_tokens)
-                    
+                instance.model = GoogleGenerativeAI(model = config.RAG_MODEL,temperature=config.TEMPERATURE,top_p =config.TOP_P,top_k=config.TOP_K,max_output_tokens=config.MAX_OUTPUT_TOKENS,credentials=instance.Credentials)
+
                 cls._instance = instance
              # cls._instance.Chatbot_manager = Chatbot_Manager(config=cls._instance.config,credentials=cls._instance.credentials)
         return cls._instance

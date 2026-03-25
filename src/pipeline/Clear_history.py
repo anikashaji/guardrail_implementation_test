@@ -1,4 +1,4 @@
-from init.singleton import Init
+from src.init.singleton import Init
 from src.config.configuration import ConfigurationManager
 from src.components.token import Token
 from src.logging import logger
@@ -20,14 +20,14 @@ class ClearHistory:
             # Count the number of messages for the given session
             message_count = self.history_collection.count_documents({"SessionId": session_id})
             print(f"Total messages for session {session_id}: {message_count}")
-            
+
             # Remove all messages for this session
             if message_count > 0:
                 result = self.history_collection.delete_many({"SessionId": session_id})
                 print(f"Removed {result.deleted_count} messages for session {session_id}.")
-            
+
             return {'status': 'success', 'message': 'All chat history cleared'}
-        
+
         except Exception as e:
             print(f"Error in clearing history for session {session_id}: {e}")
             return {'status': 'error', 'message': str(e)}
@@ -40,15 +40,15 @@ class ClearHistory:
             session_id = tok_data.get("session_id")
             # Perform the deletion
             process_result = self.clear_history_process(session_id)
-            
+
             if process_result['status'] == 'error':
                 raise HTTPException(status_code=500, detail="Failed to clear history")
 
             # Generate a fresh token to extend the session
             new_access_token = self.token.create_update_token(tok_data)
-            
+
             response = JSONResponse(content={'status': 'success', 'message': 'History cleared'})
             response.headers['Authorization'] = f"Bearer {new_access_token}"
             return response
 
-        
+

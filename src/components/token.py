@@ -3,14 +3,14 @@ import pytz,jwt
 from datetime import datetime, timedelta
 from typing import Optional
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-from init.singleton import Init
+from src.init.singleton import Init
 from src.logging import logger
 from src.utils.exception import CustomException
 
 class Token:
     def __init__(self):
         self.config = Init()
-    
+
     def create_access_token(self,data: dict, expires_delta: Optional[timedelta] = None):
         to_encode = data.copy()
         if expires_delta:
@@ -20,7 +20,7 @@ class Token:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.config.SECRET_KEY, algorithm=self.config.ALGORITHM)
         return encoded_jwt
-    
+
     def create_update_token(self,data:dict):
             logger.info("Entering access token validation method ")
             User_name = data["userName"]
@@ -43,21 +43,21 @@ class Token:
     def get_user_name_from_access_token(self,access_token):
             decoded_jwt = jwt.decode(access_token, self.config.SECRET_KEY, algorithms=[self.config.ALGORITHM])
             userName = decoded_jwt.get('userName')  # Adjust according to your token payload
-            return userName  
-    
-    
+            return userName
+
+
     def validate_access_token(self,token: str) -> Optional[dict]:
         try:
             logger.info("Entering access token validation method ")
-         
+
             decoded_jwt = jwt.decode(token, self.config.SECRET_KEY, algorithms=[self.config.ALGORITHM])
-            userName = decoded_jwt.get('userName')  # Adjust according to your token payload        
+            userName = decoded_jwt.get('userName')  # Adjust according to your token payload
             if not userName:
                 logger.error("Token is invalid does not contain required fields")
                 return None
 
-            token_record = self.config.User_Collection.find_one({'employee_code': userName,'token': token})  
-            # user = cur.fetchone()  
+            token_record = self.config.User_Collection.find_one({'employee_code': userName,'token': token})
+            # user = cur.fetchone()
             if token_record:
                 return decoded_jwt
             else:
@@ -74,7 +74,7 @@ class Token:
         except Exception as e:
              logger.error(f"An unexpected error occurred during token validation:{e}")
              return None
-            
+
     def close_mongo_connection(self):
          if self.config.Client:
               self.config.Client.close()

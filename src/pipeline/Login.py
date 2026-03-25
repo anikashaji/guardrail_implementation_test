@@ -1,5 +1,5 @@
 import os
-from init.singleton import Init
+from src.init.singleton import Init
 from src.logging import logger
 from src.components.token import Token
 import uuid
@@ -24,7 +24,7 @@ class Login:
                 url = 'https://docker.mactech.net.in:5013/ldap-service/loginthroughEmail'
                 data = {"userName": userName, "password": password}
                 result,flag = call_api_post(url, data)
-                
+
 
                 if result.status_code == 200:
                     if flag =="active":
@@ -63,7 +63,7 @@ class Login:
                              logger.warning(f"User {userName} not found during token update in login.")
                           return{"access_token": access_token, "token_type": "bearer", "status": "success","user_Status":"Inactive"}
                     else:
-                        logger.warning(f"User {userName} not Found during Login ,User_status is invalid")     
+                        logger.warning(f"User {userName} not Found during Login ,User_status is invalid")
                 else:
                     logger.error(f"LDAP service returned an error: {result.status_code}, {result.text}")
                     return {'status': 'error', 'message': 'Authentication failed with LDAP service'}

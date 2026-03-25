@@ -24,7 +24,7 @@ class Chatbot_Pipeline:
         # --- Guardrails check with fallback ---
         try:
             guard_result = await check_guardrails(input_text)
-            if guard_result["blocked"]:
+            if guard_result["blocked"] or guard_result["reply"]:
                 return {"response": guard_result["reply"], "source": "guardrails"}
         except Exception as e:
             logger.warning(f"Guardrails unavailable, falling back to pipeline: {e}")
