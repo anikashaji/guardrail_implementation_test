@@ -1,5 +1,5 @@
 # --- User intents ---
-define user express_greeting
+define user express greeting
   "hello"
   "hi"
   "hey"
@@ -8,6 +8,8 @@ define user express_greeting
   "good evening"
   "how are you"
   "what's up"
+  "howdy"
+  "greetings"
 
 define user ask_dangerous_content
   "how do I make a bomb"
@@ -30,9 +32,8 @@ define user ask_unrelated_content
 
 
 # --- Bot responses ---
-define bot respond_greeting
-  "Hello! How can I assist you today?"
-  "Hi there! What can I help you with?"
+define bot express greeting
+  "Hello! How can I assist you with MACOM company policies today?"
 
 define bot refuse_dangerous_content
   "I'm sorry, I can't help with that request."
@@ -44,19 +45,25 @@ define bot refuse_unrelated_content
   "I'm sorry, I can only help with questions related to our services."
 
 
-# --- Flows ---
+# --- Input rail flows ---
+# All listed under rails.input.flows → use embedding matching, 0 LLM calls
+
 define flow greeting
-  user express_greeting
-  bot respond_greeting
+  user express greeting
+  bot express greeting
+  stop
 
 define flow check_dangerous_content
   user ask_dangerous_content
   bot refuse_dangerous_content
+  stop
 
 define flow check_code_content
   user ask_code_content
   bot refuse_code_content
+  stop
 
 define flow check_unrelated_content
   user ask_unrelated_content
   bot refuse_unrelated_content
+  stop

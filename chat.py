@@ -21,11 +21,11 @@ class Chatbot_Pipeline:
         tok_data = self.token.validate_access_token(access_token)
         user_id = tok_data.get("sub")
 
-        # --- Guardrails check with fallback ---
+        # --- Guardrails check ---
         try:
             guard_result = await check_guardrails(input_text)
-            if guard_result["blocked"] or guard_result["reply"]:
-                return {"response": guard_result["reply"], "source": "guardrails"}
+            return guard_result
+
         except Exception as e:
             logger.warning(f"Guardrails unavailable, falling back to pipeline: {e}")
 

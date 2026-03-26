@@ -89,9 +89,11 @@ async def chat(request: Request, data: ChatRequest2 = Body(...)):
         lang = urllib.parse.unquote(data.lang)
         sanitized_input = re.sub(r'[<>{}[\]\\|]', '', user_input)
         bot = Chatbot_Pipeline()
-        result = await bot.main_chatbot(access_token, sanitized_input, lang)
+        response = await bot.main_chatbot(access_token, sanitized_input, lang)
+        # response = JSONResponse(content={'status': 'success','answer': result}, status_code=200)
+        response.headers['Authorization'] = f"Bearer {access_token}"
         logger.info("Chat request completed")
-        return JSONResponse(content=result)
+        return response
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:

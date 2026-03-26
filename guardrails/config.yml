@@ -1,13 +1,27 @@
 colang_version: "1.0"
 
-# models:
-#   - type: main
-#     engine: openai
-#     model: llama3.2:latest
+models:
+  - type: main
+    engine: openai
+    model: gemma3:latest
+    parameters:
+      base_url: "http://localhost:11434/v1"
+      api_key: "ollama"
+
+  # - type: embeddings
+  #   engine: openai
+  #   model: nomic-embed-text:latest
+  #   parameters:
+  #     base_url: "http://localhost:11434/v1"
+  #     api_key: "ollama"
 
 rails:
-  input:
-    flows:
-      - check_dangerous_content
-      - check_code_content
-      - check_unrelated_content
+  dialog:
+    user_messages:
+      # Use local embeddings for intent matching (Greeting vs. Bill Payment)
+      embeddings_only: true
+      embeddings_only_similarity_threshold: 0.4
+      embeddings_only_fallback_intent: "ask off topic"
+
+logging:
+  verbose: true
