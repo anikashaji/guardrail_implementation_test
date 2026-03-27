@@ -1,10 +1,11 @@
 import re
+from contextlib import asynccontextmanager
 from typing import Annotated, Dict
 import httpx
 from pymongo import MongoClient
 import uvicorn
 import urllib.parse
-from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, Query, Request, Response # Corrected Import
+from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from starlette.middleware.cors import CORSMiddleware
@@ -15,7 +16,7 @@ from src.pipeline.Clear_history import ClearHistory
 from src.pipeline.Login import Login
 from src.pipeline.Text_To_Speach import TextToSpeach
 from src.pipeline.history import ChatHistoryResponse, ChatMessage, HistoryPage
-from src.components.token import Token # Ensure this is imported
+from src.components.token import Token
 from src.entity import ChatHistoryClear, ChatRequest2, EncryptedLoginData, TextToSpeechRequest
 from src.utils.common import decrypt_credentials
 from src.logging import logger
@@ -25,6 +26,13 @@ from src.utils.security import (
     BlockReDocMiddleware,
     check_no_query_params
 )
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize singleton once at startup
+    app.state.bot = Chatbot_Pipeline()
+    logger.info("Chatbot_Pipeline initialized at startup.")
+    yield
 
 routes = APIRouter()
 
@@ -88,12 +96,10 @@ async def chat(request: Request, data: ChatRequest2 = Body(...)):
         user_input = urllib.parse.unquote(data.input)
         lang = urllib.parse.unquote(data.lang)
         sanitized_input = re.sub(r'[<>{}[\]\\|]', '', user_input)
-        bot = Chatbot_Pipeline()
-        response = await bot.main_chatbot(access_token, sanitized_input, lang)
-        # response = JSONResponse(content={'status': 'success','answer': result}, status_code=200)
-        response.headers['Authorization'] = f"Bearer {access_token}"
+        bot = request.app.state.bot
+        result = await bot.main_chatbot(access_token, sanitized_input, lang)
         logger.info("Chat request completed")
-        return response
+        return JSONResponse(content=result, headers={"Authorization": f"Bearer {access_token}"})
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:
@@ -270,7 +276,7 @@ async def text_to_speech(request: Request, data: TextToSpeechRequest = Body(...)
 
 
 def init_app() -> FastAPI:
-    app = FastAPI(docs_url=None, redoc_url=None)
+    app = FastAPI(docs_url=None, redoc_url=None, lifespan=lifespan)
 
     # Middleware setup
     app.add_middleware(SecurityHeadersMiddleware)

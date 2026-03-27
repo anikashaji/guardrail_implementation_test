@@ -1,38 +1,41 @@
-from guardrails_check import check_guardrails
+import threading
+from guardrails_check import get_rails
 from src.components.token import Token
 from src.pipeline.chatprocess import ChatProcess
 from src.logging import logger
 
 
 class Chatbot_Pipeline:
+    _instance = None
+    _lock = threading.Lock()
 
-    def __init__(self):
-        self.Chatbot_manager = ChatProcess()
-        self.rag_chain = self.Chatbot_manager.build_rag_chain()
-        self.token = Token()
-
-    def _run_pipeline(self, user_input, user_id):
-        return self.rag_chain.invoke(
-            {"question": user_input},
-            {"configurable": {"session_id": user_id}}
-        )
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                instance = super().__new__(cls)
+                try:
+                    instance.Chatbot_manager = ChatProcess()
+                    instance.rag_chain = instance.Chatbot_manager.build_rag_chain()
+                    instance.token = Token()
+                    logger.info("Chatbot_Pipeline initialized successfully.")
+                    cls._instance = instance
+                except Exception as e:
+                    logger.error(f"Chatbot_Pipeline initialization failed: {e}")
+                    raise RuntimeError(f"Chatbot_Pipeline initialization failed: {e}") from e
+        return cls._instance
 
     async def main_chatbot(self, access_token, input_text, lang):
         tok_data = self.token.validate_access_token(access_token)
         user_id = tok_data.get("sub")
 
-        # --- Guardrails check ---
-        try:
-            guard_result = await check_guardrails(input_text)
-            return guard_result
+        # NeMo now handles both interception AND RAG dispatch internally
+        rails = get_rails()
+        response = await rails.generate_async(
+            messages=[{"role": "user", "content": input_text}],
+            # Pass user_id so the action can use it for session tracking
+            context={"user_id": user_id}
+        )
 
-        except Exception as e:
-            logger.warning(f"Guardrails unavailable, falling back to pipeline: {e}")
-
-        # --- Normal pipeline ---
-        try:
-            response = self._run_pipeline(input_text, user_id)
-            return {"response": response, "source": "pipeline"}
-        except Exception as e:
-            logger.error(f"Pipeline failed: {e}")
-            raise
+        if isinstance(response, dict):
+            return response.get("content", "").strip()
+        return str(response).strip()

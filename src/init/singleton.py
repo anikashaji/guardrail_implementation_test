@@ -34,7 +34,6 @@ class Init:
                 instance.MongoURI = config.MONGODB_URI
                 instance.DB_Mongo = config.DB_NAME
                 instance.Chroma_collection = config.CHROMA_COLLECTION
-
                 instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=instance.Credentials)
                 instance.model = GoogleGenerativeAI(model = config.RAG_MODEL,temperature=config.TEMPERATURE,top_p =config.TOP_P,top_k=config.TOP_K,max_output_tokens=config.MAX_OUTPUT_TOKENS,credentials=instance.Credentials)
                 logger.info("Initialized Singleton Instance")

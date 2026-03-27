@@ -67,3 +67,8 @@ define flow check_unrelated_content
   user ask_unrelated_content
   bot refuse_unrelated_content
   stop
+
+define flow default
+  user ...
+  $answer = execute run_rag_pipeline
+  bot $answer
