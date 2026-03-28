@@ -1,3 +1,7 @@
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import re
 from contextlib import asynccontextmanager
 from typing import Annotated, Dict
@@ -99,7 +103,7 @@ async def chat(request: Request, data: ChatRequest2 = Body(...)):
         bot = request.app.state.bot
         result = await bot.main_chatbot(access_token, sanitized_input, lang)
         logger.info("Chat request completed")
-        return JSONResponse(content=result, headers={"Authorization": f"Bearer {access_token}"})
+        return JSONResponse(content=result, headers={"Authorization": f"Bearer {access_token}"},status_code=200)
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:
@@ -259,17 +263,6 @@ async def text_to_speech(request: Request, data: TextToSpeechRequest = Body(...)
 
     except ValidationError as e:
         raise HTTPException(status_code=422, detail=e.errors())
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -66,14 +66,13 @@ class Base_Config(BaseModel):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     CIPHER_KEY: bytes
     #DB_PATH : str
-    CHROMA_PATH: str
+    # CHROMA_PATH: str
     RAG_MODEL: str
     EMBEDD_MODEL: str
     API_KEY: str
-    CHROMA_HOST : str
-    CHROMA_PORT : int
-    CHROMA_COLLECTION: str
-    #SQLLITE_CONNECTION_STRING: str
+    QDRANT_HOST: str
+    QDRANT_PORT: int
+    QDRANT_COLLECTION: str
     MAX_POOL_SIZE: int
     TEMPERATURE: float
     TOP_P: float

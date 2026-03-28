@@ -31,9 +31,7 @@ class Chatbot_Pipeline:
         # NeMo now handles both interception AND RAG dispatch internally
         rails = get_rails()
         response = await rails.generate_async(
-            messages=[{"role": "user", "content": input_text}],
-            # Pass user_id so the action can use it for session tracking
-            context={"user_id": user_id}
+            messages=[{"role": "user", "content": input_text}]
         )
 
         if isinstance(response, dict):

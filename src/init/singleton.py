@@ -1,8 +1,8 @@
 import threading
 
-import chromadb
 from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from pymongo import MongoClient
+from qdrant_client import QdrantClient
 from src.config.configuration import ConfigurationManager
 from src.config.gcp import load_gcp_credentials
 from src.logging import logger
@@ -20,8 +20,8 @@ class Init:
                 config_obj = ConfigurationManager()
                 config = config_obj.get_base_config()
 
-                instance.Chroma_client = chromadb.HttpClient(host=config.CHROMA_HOST, port=config.CHROMA_PORT)
-                instance.Client = MongoClient(config.MONGODB_URI,MaxPoolSize = config.MAX_POOL_SIZE)
+                instance.Qdrant_client = QdrantClient(host=config.QDRANT_HOST, port=config.QDRANT_PORT,prefer_grpc=True)
+                instance.Client = MongoClient(config.MONGODB_URI, MaxPoolSize=config.MAX_POOL_SIZE)
                 instance.DB =instance.Client[config.DB_NAME]
                 instance.User_Collection = instance.DB[config.collection_user]
                 instance.History_Collection_Name = config.HISTORY_COLLECTION_NAME
@@ -33,7 +33,7 @@ class Init:
                 instance.API_KEY = config.API_KEY
                 instance.MongoURI = config.MONGODB_URI
                 instance.DB_Mongo = config.DB_NAME
-                instance.Chroma_collection = config.CHROMA_COLLECTION
+                instance.Qdrant_collection = config.QDRANT_COLLECTION
                 instance.Embeddings = GoogleGenerativeAIEmbeddings(model=config.EMBEDD_MODEL, credentials=instance.Credentials)
                 instance.model = GoogleGenerativeAI(model = config.RAG_MODEL,temperature=config.TEMPERATURE,top_p =config.TOP_P,top_k=config.TOP_K,max_output_tokens=config.MAX_OUTPUT_TOKENS,credentials=instance.Credentials)
                 logger.info("Initialized Singleton Instance")

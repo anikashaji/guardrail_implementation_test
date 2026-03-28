@@ -19,7 +19,7 @@ rails:
   dialog:
     user_messages:
       # Use local embeddings for intent matching (Greeting vs. Bill Payment)
-      embeddings_only: true
+      embeddings_only: false
       embeddings_only_similarity_threshold: 0.4
       embeddings_only_fallback_intent: "ask off topic"
 
